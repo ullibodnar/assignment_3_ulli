@@ -20,9 +20,27 @@ library(phytools)
 library(DECIPHER)
 library(muscle)
 
+#The method to load libraries above is standard, however with numer of libraries used for this project it will be best to use lapply or purr. I am gonna use lapply as I am familiar with that
+packages <- c('tidyverse', 'rentrez','Biostrings', 'fmsb',' ape', 'dendextend', 'phytools', 'DECIPHER', 'muscle')
+lapply(packages, library, character.only = T)
+
+#The code above will make your loading of packages in 2 clicks rather than 9.
+#If packages mentioned above aren't installed you can use the if function below to install them
+#  installed_packages <- packages %in% rownames(installed.packages())
+# if (any(!installed_packages)) {
+#   install.packages(packages[!installed_packages])
+# }
+#Now its 3 :)
 
 # Set working directory to utilize data from datasets
 setwd("/Users/ullibodnar/Documents/School/Guelph Masters/Bioinformatics Software Tools/Assignment 2/code")
+
+#Good practice to remind user to set working directory, however it would be best to just remind the user rather than giving path to your working directory such as
+
+#Set working directory according to your system
+# setwd('./Assignment_2')
+
+#Not sure you were there but we were told by Dr. Cottenie that we aren't suppose to throw in setwd() in our code, but its still a good reminder for the user
 
 
 
