@@ -21,8 +21,8 @@ library(DECIPHER)
 library(muscle)
 
 #The method to load libraries above is standard, however with numer of libraries used for this project it will be best to use lapply or purr. I am gonna use lapply as I am familiar with that
-packages <- c('tidyverse', 'rentrez','Biostrings', 'fmsb',' ape', 'dendextend', 'phytools', 'DECIPHER', 'muscle')
-lapply(packages, library, character.only = T)
+# packages <- c('tidyverse', 'rentrez','Biostrings', 'fmsb',' ape', 'dendextend', 'phytools', 'DECIPHER', 'muscle')
+# lapply(packages, library, character.only = T)
 
 #The code above will make your loading of packages in 2 clicks rather than 9.
 #If packages mentioned above aren't installed you can use the if function below to install them
