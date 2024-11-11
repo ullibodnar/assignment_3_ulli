@@ -20,9 +20,10 @@ library(phytools)
 library(DECIPHER)
 library(muscle)
 
-#The method to load libraries above is standard, however with numer of libraries used for this project it will be best to use lapply or purr. I am gonna use lapply as I am familiar with that
+#The method to load libraries above is standard, however with number of libraries used for this project it will be best to use lapply or purr. I am gonna use lapply as I am familiar with that
 # packages <- c('tidyverse', 'rentrez','Biostrings', 'fmsb',' ape', 'dendextend', 'phytools', 'DECIPHER', 'muscle')
 # lapply(packages, library, character.only = T)
+#rm(packages)
 
 #The code above will make your loading of packages in 2 clicks rather than 9.
 #If packages mentioned above aren't installed you can use the if function below to install them
@@ -46,11 +47,12 @@ setwd("/Users/ullibodnar/Documents/School/Guelph Masters/Bioinformatics Software
 
 # Global variables ---------------------------------------------------------------
 
-missingData <- 0.01
+missingData <- 0.01 #can potentially use a better variable name-M
 lengthVar <- 50
 chosenModel <- "K80" # K2P
 clusteringMethod <- "ML"
 
+#excellent use of global variables.
 
 
 # Global functions --------------------------------------------------------
@@ -80,7 +82,8 @@ getAverageMass <- function (df, speciesName) {
 rawBoldLepus <- read_tsv(file = "../data/lepus_bold_data.txt")
 
 # Import Pantheria DB for body mass in grams data
-pantheriaData <- read_tsv(file = "../data/Pantheria.tsv")
+pantheriaData <- read_tsv(file = "../data/PanTHERIA.tsv")
+#where did you get Pantheria dataset, also you mispelled it when writing it.
 
 # NCBI's nucleotide ---
 # Determine possible database search locations
@@ -100,6 +103,8 @@ lepusFetch <- entrez_fetch(db = "nucleotide", id = lepusSearch$ids, rettype = "f
 # Write the data to fasta file; commented out because the data have already been imported
 # write(lepusFetch, "lepus_fetch.fasta", sep = "\n") --- Done on Oct. 18
 
+#good job so far, moving forward from here it will be good practice to rm variables you are no longer using
+rm(lepusFetch,lepusRetmax,lepusSearch, packages)
 # Import already created NCBI data file
 nucleotideLepusStringSet <- readDNAStringSet("../data/lepus_fetch.fasta")
 
@@ -114,6 +119,11 @@ nucleotideLepus <- data.frame(title = names(nucleotideLepusStringSet), nucleotid
 boldLepus <- rawBoldLepus[, c("processid", "species_name", "markercode", "nucleotides")] |>
   filter(!is.na(nucleotides)) |>
   filter(markercode == "COI-5P")
+#you are subsetting then using tidyverse, you can tidyverse the whole thing in one shot
+# boldLepus <- rawBoldLepus %>%
+#   select(processid,species_name,markercode,nucleotides) %>%
+#   filter(!is.na(nucleotides)) %>%
+#   filter(markercode == 'COI-5P')
 
 # Change BOLD's processid column name to "id" to match NCBI database
 names(boldLepus)[names(boldLepus) == "processid"] <- "id"
@@ -133,13 +143,18 @@ nucleotideLepus <- nucleotideLepus[ , c("id", "species_name", "markercode", "nuc
 # MERGE DATAFRAMES
 lepusSeq <- merge(nucleotideLepus, boldLepus, all = T)
 
+#Here would be a good place to remove all variables that are no longer in use moving forward to clean up the workspace
+#rm()
+
 # Map body masses from Pantheria to the subsetted column for downstream analysis of body masses
 lepusSeq$mass_g <- purrr::map(lepusSeq$species_name, function (x) {getAverageMass(pantheriaData, x)}) |>
   as.numeric()
 
+#very nice and fancy, professional right here
+
 # Remove duplicates, trim Ns from the ends and remove gaps, remove entries with NA species_name, and remove entries with no mass data
 lepusSeq <- lepusSeq[!duplicated(lepusSeq$nucleotides), ]
-
+#you can use distinct(nucleotides, keep_all = T) below to remove duplicates 
 lepusSeq <- lepusSeq |>
   filter(!is.na(species_name)) |>
   filter(mass_g > 0) |>
@@ -155,7 +170,7 @@ lepusSeqSubset <- lepusSeq |>
   slice_sample(n = 1) |> # Randomly selects one row per species, because Karl told me to do it :)
   ungroup() |>
   as.data.frame()
-
+#LOL @ Karl's comment would probably help as to why its needed
 
 
 # View data in radar chart ------------------------------------------------
