@@ -23,7 +23,7 @@ library(muscle)
 #The method to load libraries above is standard, however with number of libraries used for this project it will be best to use lapply or purr. I am gonna use lapply as I am familiar with that
 # packages <- c('tidyverse', 'rentrez','Biostrings', 'fmsb',' ape', 'dendextend', 'phytools', 'DECIPHER', 'muscle')
 # lapply(packages, library, character.only = T)
-#rm(packages)
+# rm(packages)
 
 #The code above will make your loading of packages in 2 clicks rather than 9.
 #If packages mentioned above aren't installed you can use the if function below to install them
@@ -82,9 +82,9 @@ getAverageMass <- function (df, speciesName) {
 rawBoldLepus <- read_tsv(file = "../data/lepus_bold_data.txt")
 
 # Import Pantheria DB for body mass in grams data
-pantheriaData <- read_tsv(file = "../data/PanTHERIA.tsv")
-#where did you get Pantheria dataset, also you mispelled it when writing it.
-
+pantheriaData <- read_tsv(file = "../data/Pantheria.tsv")
+#where did you get Pantheria dataset, also you mispelled it when writing it, so it wouldnt load :(.
+#pantheriaData <- read_tsv(file = "../data/PanTHERIA.tsv")
 # NCBI's nucleotide ---
 # Determine possible database search locations
 entrez_dbs()
@@ -144,17 +144,17 @@ nucleotideLepus <- nucleotideLepus[ , c("id", "species_name", "markercode", "nuc
 lepusSeq <- merge(nucleotideLepus, boldLepus, all = T)
 
 #Here would be a good place to remove all variables that are no longer in use moving forward to clean up the workspace
-#rm()
+#rm(boldLepus,nucleotideLepus, nucleotideLepusStringSet, rawBoldLepus)
 
 # Map body masses from Pantheria to the subsetted column for downstream analysis of body masses
 lepusSeq$mass_g <- purrr::map(lepusSeq$species_name, function (x) {getAverageMass(pantheriaData, x)}) |>
   as.numeric()
 
-#very nice and fancy, professional right here
+#very nice and fancy, professional right here-M
 
 # Remove duplicates, trim Ns from the ends and remove gaps, remove entries with NA species_name, and remove entries with no mass data
 lepusSeq <- lepusSeq[!duplicated(lepusSeq$nucleotides), ]
-#you can use distinct(nucleotides, keep_all = T) below to remove duplicates 
+#you can use distinct(nucleotides, keep_all = T) below to remove duplicates-M
 lepusSeq <- lepusSeq |>
   filter(!is.na(species_name)) |>
   filter(mass_g > 0) |>
@@ -170,7 +170,7 @@ lepusSeqSubset <- lepusSeq |>
   slice_sample(n = 1) |> # Randomly selects one row per species, because Karl told me to do it :)
   ungroup() |>
   as.data.frame()
-#LOL @ Karl's comment would probably help as to why its needed
+#LOL @ Karl's comment would probably help as to why its needed-M
 
 
 # View data in radar chart ------------------------------------------------
@@ -213,6 +213,8 @@ lepusSeqSubsetAlignment <- DNAStringSet(muscle::muscle(lepusSeqSubset$nucleotide
 # Check it out in the browser to see if anything is out of place --> originally, I saw that one of the names was NA and I had to go back to remove NA species_name entries
 #BrowseSeqs(lepusSeqSubsetAlignment)
 
+#nice check! -M
+
 
 
 # Clustering --------------------------------------------------------------
@@ -234,6 +236,7 @@ clustersLepusCOI <- DECIPHER::TreeLine(lepusSeqSubsetAlignment,
                                        reconstruct = TRUE,
                                        maxTime = 0.01)
 
+#Try to add in a metric to measure the model efficiency-M
 
 # Bottom, left, top, right margins
 par(mar=c(5,5,1,10))
@@ -262,4 +265,6 @@ tree_phylo <- as.phylo(clustersLepusCOI)
 lambda_estimation <- phylosig(tree_phylo, lepusSeqSubset$mass_g, method = "lambda")
 
 print(lambda_estimation)
+
+#Excellent
 
