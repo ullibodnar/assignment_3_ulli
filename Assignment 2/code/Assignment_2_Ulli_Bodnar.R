@@ -150,7 +150,7 @@ lepusSeq <- merge(nucleotideLepus, boldLepus, all = T)
 lepusSeq$mass_g <- purrr::map(lepusSeq$species_name, function (x) {getAverageMass(pantheriaData, x)}) |>
   as.numeric()
 
-#very nice and fancy, professional right here-M
+#very nice and fancy can use map_dbl so you wouldnt need as.numeric, professional right here-M
 
 # Remove duplicates, trim Ns from the ends and remove gaps, remove entries with NA species_name, and remove entries with no mass data
 lepusSeq <- lepusSeq[!duplicated(lepusSeq$nucleotides), ]
