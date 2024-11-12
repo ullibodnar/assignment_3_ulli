@@ -119,13 +119,16 @@ nucleotideLepus <- data.frame(title = names(nucleotideLepusStringSet), nucleotid
 boldLepus <- rawBoldLepus[, c("processid", "species_name", "markercode", "nucleotides")] |>
   filter(!is.na(nucleotides)) |>
   filter(markercode == "COI-5P")
-#you are subsetting then using tidyverse, you can tidyverse the whole thing in one shot
+#you are subsetting then using tidyverse, you can tidyverse the whole thing in one shot-M
 # boldLepus <- rawBoldLepus %>%
 #   select(processid,species_name,markercode,nucleotides) %>%
 #   filter(!is.na(nucleotides)) %>%
-#   filter(markercode == 'COI-5P')
+#   filter(markercode == 'COI-5P') %>%
+#   rename(id = processid)
+
 
 # Change BOLD's processid column name to "id" to match NCBI database
+#This can also be done in the chunk above -M
 names(boldLepus)[names(boldLepus) == "processid"] <- "id"
   
 # Manipulate the NCBI dataframe to have correct column names for later merge with boldLepus
