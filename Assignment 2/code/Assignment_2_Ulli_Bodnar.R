@@ -237,6 +237,7 @@ clustersLepusCOI <- DECIPHER::TreeLine(lepusSeqSubsetAlignment,
                                        maxTime = 0.01)
 
 #Try to add in a metric to measure the model efficiency-M
+# Map could be possibly made with these species and body mass maybe..-M
 
 # Bottom, left, top, right margins
 par(mar=c(5,5,1,10))
@@ -251,7 +252,8 @@ clustersLepusCOI |>
   set("leaves_cex", scaledMass) |>
   set("nodes_col", "orange") |>
   set("labels_col", "black") |>
-  plot(horiz = TRUE, xlab = "Distance", ylab = "Species")
+  plot(horiz = TRUE, xlab = "Distance", ylab = "Species", main = 'Phylogenetic Tree of Lepus Species')
+#Added title in the figure -M
 
 
 # Test for phylogenetic conservatism --------------------------------------
@@ -266,5 +268,5 @@ lambda_estimation <- phylosig(tree_phylo, lepusSeqSubset$mass_g, method = "lambd
 
 print(lambda_estimation)
 
-#Excellent
+#Excellent-M
 
