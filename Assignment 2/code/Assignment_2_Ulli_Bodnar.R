@@ -21,7 +21,7 @@ library(DECIPHER)
 library(muscle)
 
 #The method to load libraries above is standard, however with number of libraries used for this project it will be best to use lapply or purr. I am gonna use lapply as I am familiar with that-M
-# packages <- c('tidyverse', 'rentrez','Biostrings', 'fmsb', 'dendextend', 'phytools', 'DECIPHER', 'muscle', 'ape', 'vegan')
+# packages <- c('tidyverse', 'rentrez','Biostrings', 'fmsb', 'dendextend', 'phytools', 'DECIPHER', 'muscle', 'ape', 'vegan', 'ggrepel')
 # lapply(packages, library, character.only = T)
 # rm(packages)
 
@@ -39,7 +39,7 @@ setwd("/Users/ullibodnar/Documents/School/Guelph Masters/Bioinformatics Software
 #Good practice to remind user to set working directory, however it would be best to just remind the user rather than giving path to your working directory -M
 
 #Set working directory according to your system-M
-# setwd('./Assignment_2')
+# setwd('./Assignment_2/code')
 
 #Not sure you were there but we were told by Dr. Cottenie that we aren't suppose to throw in setwd() in our code, but its still a good reminder for the user-M
 
@@ -84,7 +84,7 @@ rawBoldLepus <- read_tsv(file = "../data/lepus_bold_data.txt")
 # Import Pantheria DB for body mass in grams data
 pantheriaData <- read_tsv(file = "../data/Pantheria.tsv")
 #where did you get Pantheria dataset, also you mispelled it when writing it, so it wouldnt load :(.-M
-#pantheriaData <- read_tsv(file = "../data/PanTHERIA.tsv")
+# pantheriaData <- read_tsv(file = "../data/PanTHERIA.tsv")
 # NCBI's nucleotide ---
 # Determine possible database search locations
 entrez_dbs()
@@ -147,7 +147,7 @@ nucleotideLepus <- nucleotideLepus[ , c("id", "species_name", "markercode", "nuc
 lepusSeq <- merge(nucleotideLepus, boldLepus, all = T)
 
 #Here would be a good place to remove all variables that are no longer in use moving forward to clean up the workspace
-#rm(boldLepus,nucleotideLepus, nucleotideLepusStringSet, rawBoldLepus)
+rm(boldLepus,nucleotideLepus, nucleotideLepusStringSet, rawBoldLepus)
 
 # Map body masses from Pantheria to the subsetted column for downstream analysis of body masses
 lepusSeq$mass_g <- purrr::map(lepusSeq$species_name, function (x) {getAverageMass(pantheriaData, x)}) |>
@@ -284,7 +284,7 @@ lepusSeqSubset %>%
   mutate(seq_length = nchar(nucleotides2)) %>% 
   ggplot(aes(x='',y = seq_length)) +
   geom_violin(fill = "lightblue") +
-  labs(y = "Sequence Length", title = "Sequence Length Distribution") +
+  labs(y = "Sequence Length (bp)", title = "Sequence Length Distribution for Lepus genus") +
   theme_minimal()
 #This plot shows most of your sequence lengths are around 660 bp, indicating it will be a good fit for alignment
 #Novelty Aspect no.3: Principal Component Analysis (PCA) plot
@@ -296,10 +296,11 @@ pcoa_results <- cmdscale(distanceMatrix, eig = TRUE, k = 2)
 pcoa_coords <- as.data.frame(pcoa_results$points)
 colnames(pcoa_coords) <- c("PCoA1", "PCoA2")
 rownames(pcoa_coords) <- rownames(distanceMatrix)
-
+pcoa_coords$mass <- lepusSeqSubset$mass_g
 #plotting using ggplot2
-ggplot(pcoa_coords, aes(x = PCoA1, y = PCoA2, label = rownames(pcoa_coords))) +
+ggplot(pcoa_coords, aes(x = PCoA1, y = PCoA2, label = rownames(pcoa_coords), colour = mass)) +
   geom_point(color = "steelblue", size = 3) +
-  geom_text(vjust = -1, size = 3) +
+  geom_label_repel(size = 3, box.padding = 0.3, point.padding = 0.2, max.overlaps = Inf) +
+  #scale_color_viridis_c(direction = -1)+
   labs(title = "PCoA of Genetic Distances", x = "PCoA1", y = "PCoA2") +
   theme_minimal()
