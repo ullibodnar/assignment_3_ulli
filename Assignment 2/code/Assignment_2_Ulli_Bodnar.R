@@ -20,13 +20,13 @@ library(phytools)
 library(DECIPHER)
 library(muscle)
 
-#The method to load libraries above is standard, however with number of libraries used for this project it will be best to use lapply or purr. I am gonna use lapply as I am familiar with that
-# packages <- c('tidyverse', 'rentrez','Biostrings', 'fmsb',' ape', 'dendextend', 'phytools', 'DECIPHER', 'muscle')
+#The method to load libraries above is standard, however with number of libraries used for this project it will be best to use lapply or purr. I am gonna use lapply as I am familiar with that-M
+# packages <- c('tidyverse', 'rentrez','Biostrings', 'fmsb', 'dendextend', 'phytools', 'DECIPHER', 'muscle', 'ape', 'vegan')
 # lapply(packages, library, character.only = T)
 # rm(packages)
 
 #The code above will make your loading of packages in 2 clicks rather than 9.
-#If packages mentioned above aren't installed you can use the if function below to install them
+#If packages mentioned above aren't installed you can use the if function below to install them-M
 #  installed_packages <- packages %in% rownames(installed.packages())
 # if (any(!installed_packages)) {
 #   install.packages(packages[!installed_packages])
@@ -36,12 +36,12 @@ library(muscle)
 # Set working directory to utilize data from datasets
 setwd("/Users/ullibodnar/Documents/School/Guelph Masters/Bioinformatics Software Tools/Assignment 2/code")
 
-#Good practice to remind user to set working directory, however it would be best to just remind the user rather than giving path to your working directory such as
+#Good practice to remind user to set working directory, however it would be best to just remind the user rather than giving path to your working directory -M
 
-#Set working directory according to your system
+#Set working directory according to your system-M
 # setwd('./Assignment_2')
 
-#Not sure you were there but we were told by Dr. Cottenie that we aren't suppose to throw in setwd() in our code, but its still a good reminder for the user
+#Not sure you were there but we were told by Dr. Cottenie that we aren't suppose to throw in setwd() in our code, but its still a good reminder for the user-M
 
 
 
@@ -83,7 +83,7 @@ rawBoldLepus <- read_tsv(file = "../data/lepus_bold_data.txt")
 
 # Import Pantheria DB for body mass in grams data
 pantheriaData <- read_tsv(file = "../data/Pantheria.tsv")
-#where did you get Pantheria dataset, also you mispelled it when writing it, so it wouldnt load :(.
+#where did you get Pantheria dataset, also you mispelled it when writing it, so it wouldnt load :(.-M
 #pantheriaData <- read_tsv(file = "../data/PanTHERIA.tsv")
 # NCBI's nucleotide ---
 # Determine possible database search locations
@@ -104,7 +104,7 @@ lepusFetch <- entrez_fetch(db = "nucleotide", id = lepusSearch$ids, rettype = "f
 # write(lepusFetch, "lepus_fetch.fasta", sep = "\n") --- Done on Oct. 18
 
 #good job so far, moving forward from here it will be good practice to rm variables you are no longer using
-rm(lepusFetch,lepusRetmax,lepusSearch, packages)
+rm(lepusFetch,lepusRetmax,lepusSearch)
 # Import already created NCBI data file
 nucleotideLepusStringSet <- readDNAStringSet("../data/lepus_fetch.fasta")
 
@@ -153,7 +153,7 @@ lepusSeq <- merge(nucleotideLepus, boldLepus, all = T)
 lepusSeq$mass_g <- purrr::map(lepusSeq$species_name, function (x) {getAverageMass(pantheriaData, x)}) |>
   as.numeric()
 
-#very nice and fancy can use map_dbl so you wouldnt need as.numeric, professional right here-M
+#very nice and fancy can use map_dbl so you wouldn't need as.numeric, professional right here-M
 
 # Remove duplicates, trim Ns from the ends and remove gaps, remove entries with NA species_name, and remove entries with no mass data
 lepusSeq <- lepusSeq[!duplicated(lepusSeq$nucleotides), ]
@@ -273,3 +273,33 @@ print(lambda_estimation)
 
 #Excellent-M
 
+#Novelty Aspect no.1: heatmap ----
+#A simple heatmap to see genetic distances and identify closely related species can be used to validate DECIPHER results independently
+heatmap(distanceMatrix, symm = TRUE, main = "Genetic Distance Heatmap", xlab = "Species", ylab = "Species")
+
+#Novelty Aspect no.2: Sequence length comparison----
+#This helps identify outliers, ensuring comparability and model suitability for downstream analysis.
+#adding a column to counts sequence length and plotting a violin plot
+lepusSeqSubset %>%
+  mutate(seq_length = nchar(nucleotides2)) %>% 
+  ggplot(aes(x='',y = seq_length)) +
+  geom_violin(fill = "lightblue") +
+  labs(y = "Sequence Length", title = "Sequence Length Distribution") +
+  theme_minimal()
+#This plot shows most of your sequence lengths are around 660 bp, indicating it will be a good fit for alignment
+#Novelty Aspect no.3: Principal Component Analysis (PCA) plot
+
+#converting distance matrix to PCOA object
+pcoa_results <- cmdscale(distanceMatrix, eig = TRUE, k = 2) 
+
+#Extracting co ordinates in data frame for plotting
+pcoa_coords <- as.data.frame(pcoa_results$points)
+colnames(pcoa_coords) <- c("PCoA1", "PCoA2")
+rownames(pcoa_coords) <- rownames(distanceMatrix)
+
+#plotting using ggplot2
+ggplot(pcoa_coords, aes(x = PCoA1, y = PCoA2, label = rownames(pcoa_coords))) +
+  geom_point(color = "steelblue", size = 3) +
+  geom_text(vjust = -1, size = 3) +
+  labs(title = "PCoA of Genetic Distances", x = "PCoA1", y = "PCoA2") +
+  theme_minimal()
