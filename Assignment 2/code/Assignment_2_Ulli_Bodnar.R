@@ -1,5 +1,9 @@
 # Setup --------------------------------------------------------
 
+####Attribution----
+#Author: Ulli Bodnar
+#All edits done by Moiz A. Syed
+
 # Import the libraries so that their functions can be used
 # Just a heads up, I find R kinda unpredictible with the cache and holding libraries loaded so if this doesn't work by just the ones i've uncommented, please just uncomment all of these below and run it again. It will for sure work with all loaded, but I am pretty sure I only need the ones that are labelled 'in use'
 # MIGHT NEED LIBRARIES:
