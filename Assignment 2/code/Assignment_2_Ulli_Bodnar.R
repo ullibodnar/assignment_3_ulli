@@ -84,7 +84,7 @@ rawBoldLepus <- read_tsv(file = "../data/lepus_bold_data.txt")
 # Import Pantheria DB for body mass in grams data
 pantheriaData <- read_tsv(file = "../data/Pantheria.tsv")
 #where did you get Pantheria dataset, also you mispelled it when writing it, so it wouldnt load :(.-M
-# pantheriaData <- read_tsv(file = "../data/PanTHERIA.tsv")
+#pantheriaData <- read_tsv(file = "../data/PanTHERIA.tsv") -M
 # NCBI's nucleotide ---
 # Determine possible database search locations
 entrez_dbs()
@@ -199,8 +199,11 @@ radarchart( massAndNames, axistype=1,
             cglcol="grey", cglty=1, axislabcol="black", caxislabels=seq(1000,5000, 1000), cglwd=0.8,
             vlcex=0.8 
 )
+#Adding a title to the chart-M
+title(main = "Radar Chart of Mass Distribution Across Lepus Species", cex.main = 1.2)
 
-
+#removing variables not in use moving forward -M
+rm(massAndNames)
 
 # Aligning sequences ------------------------------------------------------
 # put entire lepus subset into DNAStringSet to work with the library
@@ -239,8 +242,6 @@ clustersLepusCOI <- DECIPHER::TreeLine(lepusSeqSubsetAlignment,
                                        reconstruct = TRUE,
                                        maxTime = 0.01)
 
-#Try to add in a metric to measure the model efficiency-M
-# Map could be possibly made with these species and body mass maybe..-M
 
 # Bottom, left, top, right margins
 par(mar=c(5,5,1,10))
@@ -279,13 +280,21 @@ heatmap(distanceMatrix, symm = TRUE, main = "Genetic Distance Heatmap", xlab = "
 
 #Novelty Aspect no.2: Sequence length comparison----
 #This helps identify outliers, ensuring comparability and model suitability for downstream analysis.
-#adding a column to counts sequence length and plotting a violin plot
+#adding a column to counts sequence length and plotting a violin plot + including a summary 
 lepusSeqSubset %>%
   mutate(seq_length = nchar(nucleotides2)) %>% 
   ggplot(aes(x='',y = seq_length)) +
   geom_violin(fill = "lightblue") +
   labs(y = "Sequence Length (bp)", title = "Sequence Length Distribution for Lepus genus") +
   theme_minimal()
+#summary of the sequence data
+lepusSeqSubset  %>% 
+  mutate(seq_length = nchar(nucleotides2)) %>% 
+  summarize(
+  min_length = min(seq_length),
+  max_length = max(seq_length),
+  mean_length = mean(seq_length),
+  sd_length = sd(seq_length))
 #This plot shows most of your sequence lengths are around 660 bp, indicating it will be a good fit for alignment
 #Novelty Aspect no.3: Principal Component Analysis (PCA) plot
 
