@@ -31,7 +31,7 @@ library(muscle)
 # if (any(!installed_packages)) {
 #   install.packages(packages[!installed_packages])
 # }
-#Now its 3 :)
+#Now its 3 :) -M
 
 # Set working directory to utilize data from datasets
 setwd("/Users/ullibodnar/Documents/School/Guelph Masters/Bioinformatics Software Tools/Assignment 2/code")
@@ -52,7 +52,7 @@ lengthVar <- 50
 chosenModel <- "K80" # K2P
 clusteringMethod <- "ML"
 
-#excellent use of global variables.
+#excellent use of global variables. -M
 
 
 # Global functions --------------------------------------------------------
@@ -84,7 +84,7 @@ rawBoldLepus <- read_tsv(file = "../data/lepus_bold_data.txt")
 # Import Pantheria DB for body mass in grams data
 pantheriaData <- read_tsv(file = "../data/Pantheria.tsv")
 #where did you get Pantheria dataset, also you mispelled it when writing it, so it wouldnt load :(.-M
-#pantheriaData <- read_tsv(file = "../data/PanTHERIA.tsv") -M
+#pantheriaData <- read_tsv(file = "../data/PanTHERIA.tsv") #-M
 # NCBI's nucleotide ---
 # Determine possible database search locations
 entrez_dbs()
@@ -154,6 +154,7 @@ lepusSeq$mass_g <- purrr::map(lepusSeq$species_name, function (x) {getAverageMas
   as.numeric()
 
 #very nice and fancy can use map_dbl so you wouldn't need as.numeric, professional right here-M
+# lepusSeq$mass_g <- purrr::map_dbl(lepusSeq$species_name, function(x) { getAverageMass(pantheriaData, x) })
 
 # Remove duplicates, trim Ns from the ends and remove gaps, remove entries with NA species_name, and remove entries with no mass data
 lepusSeq <- lepusSeq[!duplicated(lepusSeq$nucleotides), ]
@@ -173,7 +174,7 @@ lepusSeqSubset <- lepusSeq |>
   slice_sample(n = 1) |> # Randomly selects one row per species, because Karl told me to do it :)
   ungroup() |>
   as.data.frame()
-#LOL @ Karl's comment would probably help as to why its needed-M
+#slicing probably to get one sample rather than replicates, since this is between species not within a population -M
 
 
 # View data in radar chart ------------------------------------------------
@@ -207,6 +208,7 @@ rm(massAndNames)
 
 # Aligning sequences ------------------------------------------------------
 # put entire lepus subset into DNAStringSet to work with the library
+# I think you meant putting the column in DNAStringSet not the entire dataset -M
 lepusSeqSubset$nucleotides2 <- DNAStringSet(lepusSeqSubset$nucleotides2)
 
 # Map the names, substituting L. for Lepus for readability. 
@@ -274,20 +276,21 @@ print(lambda_estimation)
 
 #Excellent-M
 
-#Novelty Aspect no.1: heatmap ----
-#A simple heatmap to see genetic distances and identify closely related species can be used to validate DECIPHER results independently
+#Novelty Aspect no.1: Heatmap ----
+#A simple heatmap to see genetic distances and identify closely related species can be used to validate DECIPHER results independently -M
 heatmap(distanceMatrix, symm = TRUE, main = "Genetic Distance Heatmap", xlab = "Species", ylab = "Species")
 
 #Novelty Aspect no.2: Sequence length comparison----
-#This helps identify outliers, ensuring comparability and model suitability for downstream analysis.
-#adding a column to counts sequence length and plotting a violin plot + including a summary 
+
+#This helps identify outliers, ensuring comparability and model suitability for downstream analysis. -M
+#adding a column to counts sequence length and plotting a violin plot for qualitiative representation
 lepusSeqSubset %>%
   mutate(seq_length = nchar(nucleotides2)) %>% 
   ggplot(aes(x='',y = seq_length)) +
   geom_violin(fill = "lightblue") +
   labs(y = "Sequence Length (bp)", title = "Sequence Length Distribution for Lepus genus") +
   theme_minimal()
-#summary of the sequence data
+#summary of the sequence data aka a quantative representation
 lepusSeqSubset  %>% 
   mutate(seq_length = nchar(nucleotides2)) %>% 
   summarize(
@@ -295,8 +298,8 @@ lepusSeqSubset  %>%
   max_length = max(seq_length),
   mean_length = mean(seq_length),
   sd_length = sd(seq_length))
-#This plot shows most of your sequence lengths are around 660 bp, indicating it will be a good fit for alignment
-#Novelty Aspect no.3: Principal Component Analysis (PCA) plot
+#This plot shows most of your sequence lengths are around 660 bp, indicating it will be a good fit for alignment -M
+#Novelty Aspect no.3: Principal Component Analysis (PCA) plot----
 
 #converting distance matrix to PCOA object
 pcoa_results <- cmdscale(distanceMatrix, eig = TRUE, k = 2) 
@@ -310,6 +313,6 @@ pcoa_coords$mass <- lepusSeqSubset$mass_g
 ggplot(pcoa_coords, aes(x = PCoA1, y = PCoA2, label = rownames(pcoa_coords), colour = mass)) +
   geom_point(color = "steelblue", size = 3) +
   geom_label_repel(size = 3, box.padding = 0.3, point.padding = 0.2, max.overlaps = Inf) +
-  #scale_color_viridis_c(direction = -1)+
+  #scale_color_viridis_c(direction = -1)+ #Attempt to reverse the scaling of color -M
   labs(title = "PCoA of Genetic Distances", x = "PCoA1", y = "PCoA2") +
   theme_minimal()
